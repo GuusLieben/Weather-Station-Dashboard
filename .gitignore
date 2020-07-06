@@ -1,0 +1,12 @@
+﻿.gradle
+.ideaDataSources
+build
+dataSources
+node_modules
+target
+src/main/resources/application.properties
+*.iml
+*.ipr
+*.iws
+webpack.generated.js
+package-lock.json
