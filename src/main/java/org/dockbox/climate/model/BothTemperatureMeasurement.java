@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.sql.Timestamp;
 
-public class TemperatureMeasurement extends Measurement {
+public class BothTemperatureMeasurement extends Measurement {
 
     private final double temperatureInside;
     private final double temperatureOutside;
 
-    public TemperatureMeasurement(Timestamp timestamp, double inside, double outside) {
+    public BothTemperatureMeasurement(Timestamp timestamp, double inside, double outside) {
         super(timestamp, -1D);
         this.temperatureInside = inside;
         this.temperatureOutside = outside;
