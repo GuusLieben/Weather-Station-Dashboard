@@ -21,7 +21,7 @@ import lombok.Getter;
 @Entity
 @Table(name = "temperatures")
 @Getter
-public class TemperatureRow {
+public class TemperatureRow extends AbstractRow {
 
     @JsonProperty("lux")
     private int light;
@@ -74,5 +74,12 @@ public class TemperatureRow {
                 ", time=" + time +
                 ", id=" + id +
                 '}';
+    }
+
+    @Override
+    public LocalDateTime getLDT() {
+        LocalDate localDate = date.toLocalDate();
+        LocalTime localTime = time.toLocalTime().plus(1, ChronoUnit.HOURS); // Time difference from UTC
+        return LocalDateTime.of(localDate, localTime);
     }
 }
