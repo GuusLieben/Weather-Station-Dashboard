@@ -1,6 +1,6 @@
 package org.dockbox.climate.rest;
 
-import org.dockbox.climate.IllegalQueryException;
+import org.dockbox.climate.exceptions.IllegalDateQuery;
 import org.dockbox.climate.model.ErrorObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,8 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 public class ExceptionHandlingController extends ResponseEntityExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(IllegalQueryException.class)
-    public ErrorObject handleIllegalQuery(HttpServletRequest req, IllegalQueryException iqe) {
+    @ExceptionHandler(IllegalDateQuery.class)
+    public ErrorObject handleIllegalQuery(HttpServletRequest req, IllegalDateQuery iqe) {
         return new ErrorObject(
                 400,
                 "Invalid Query",
