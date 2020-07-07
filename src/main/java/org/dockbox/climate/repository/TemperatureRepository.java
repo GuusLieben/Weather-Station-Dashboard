@@ -13,6 +13,10 @@ public interface TemperatureRepository extends Repository<TemperatureRow, Intege
 
     List<TemperatureRow> findByTemp1GreaterThanAndTemp2GreaterThanAndTemp1LessThanAndTemp2LessThan(double temp1Above, double temp2Above, double temp1Below, double temp2Below);
 
+    List<TemperatureRow> findByTemp1GreaterThanAndTemp1LessThan(double above, double below);
+
+    List<TemperatureRow> findByTemp2GreaterThanAndTemp2LessThan(double above, double below);
+
     List<TemperatureRow> findByHumidityGreaterThanAndHumidityLessThan(double above, double below);
 
 }
