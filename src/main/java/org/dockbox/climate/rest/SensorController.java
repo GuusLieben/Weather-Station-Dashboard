@@ -68,6 +68,33 @@ public class SensorController {
     }
 
     private Object handleParticleTable(int above, int below, LocalDate before, LocalDate after, int max, boolean full, int page, String type, ITriState triState) {
+        List<ParticleRow> results;
+        Function<ParticleRow, Measurement> conversionFunc;
+        Comparator<ParticleRow> sortingComparator = null;
+
+        switch (type) {
+            case "pm10":
+                results = particleRepository.findByPm10GreaterThanAndPm10LessThan(above, below);
+                conversionFunc = row -> new PM10Measurement(row.getTimestamp(), row.getPm10());
+                if (triState.isDefined()) {
+                    sortingComparator = (curr, next) -> triState.isTrue()
+                            ? Double.compare(curr.getPm10(), next.getPm10())
+                            : Double.compare(next.getPm10(), curr.getPm10());
+                }
+                break;
+            case "pm25":
+                results = particleRepository.findByPm25GreaterThanAndPm25LessThan(above, below);
+                conversionFunc = row -> new PM10Measurement(row.getTimestamp(), row.getPm25());
+                if (triState.isDefined()) {
+                    sortingComparator = (curr, next) -> triState.isTrue()
+                            ? Double.compare(curr.getPm25(), next.getPm25())
+                            : Double.compare(next.getPm25(), curr.getPm25());
+                }
+                break;
+            default:
+                throw new IllegalParameterQuery("type", type);
+        }
+        return apply(results, before, after, page, max, full, conversionFunc, sortingComparator);
     }
 
     private List<?> handleTemperatureTable(int above, int below, LocalDate before, LocalDate after, int max, boolean full, int page, String type, ITriState triState) {
