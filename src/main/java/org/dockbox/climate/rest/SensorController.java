@@ -1,8 +1,5 @@
 package org.dockbox.climate.rest;
 
-import com.helger.commons.state.ETriState;
-import com.helger.commons.state.ITriState;
-
 import org.dockbox.climate.exceptions.IllegalDateQuery;
 import org.dockbox.climate.exceptions.IllegalParameterQuery;
 import org.dockbox.climate.model.BothTemperatureMeasurement;
@@ -37,6 +34,25 @@ import java.util.stream.Stream;
 @RestController
 public class SensorController {
 
+    private enum Sort {
+        DEFAULT, ASCENDING, DESCENDING;
+
+        boolean isDefault() {
+            return this.equals(DEFAULT);
+        }
+
+        Boolean getDirectionAsBoolean() {
+            switch (this) {
+                default:
+                case DEFAULT:
+                    return null;
+                case ASCENDING:
+                    return true;
+                case DESCENDING:
+                    return false;
+            }
+        }
+    }
     private final TemperatureRepository temperatureRepository;
     private final ParticleRepository particleRepository;
 
@@ -61,13 +77,15 @@ public class SensorController {
 
             @PathVariable("type") String type
     ) {
-        ITriState triState = "asc".equals(sort) ? ETriState.TRUE : "desc".equals(sort) ? ETriState.FALSE : ETriState.UNDEFINED;
+        Sort sorter = "asc".equals(sort) ? Sort.ASCENDING : "desc".equals(sort) ? Sort.DESCENDING : Sort.DEFAULT;
         return (type.startsWith("pm"))
-                ? handleParticleTable(above, below, before, after, max > 0 ? max : 200, full, page, type, triState)
-                : handleTemperatureTable(above, below, before, after, max > 0 ? max : 500, full, page, type, triState);
+                ? handleParticleTable(above, below, before, after, max > 0 ? max : 200, full, page, type, sorter)
+                : handleTemperatureTable(above, below, before, after, max > 0 ? max : 500, full, page, type, sorter);
     }
 
-    private Object handleParticleTable(int above, int below, LocalDate before, LocalDate after, int max, boolean full, int page, String type, ITriState triState) {
+    // Suppresses potential NPE warning on getDirectionAsBoolean, as this is mitigated by a prepended isDefault condition
+    @SuppressWarnings("ConstantConditions")
+    private Object handleParticleTable(int above, int below, LocalDate before, LocalDate after, int max, boolean full, int page, String type, Sort sort) {
         List<ParticleRow> results;
         Function<ParticleRow, Measurement> conversionFunc;
         Comparator<ParticleRow> sortingComparator = null;
@@ -76,8 +94,8 @@ public class SensorController {
             case "pm10":
                 results = particleRepository.findByPm10GreaterThanAndPm10LessThan(above, below);
                 conversionFunc = row -> new PM10Measurement(row.getTimestamp(), row.getPm10());
-                if (triState.isDefined()) {
-                    sortingComparator = (curr, next) -> triState.isTrue()
+                if (!sort.isDefault()) {
+                    sortingComparator = (curr, next) -> sort.getDirectionAsBoolean()
                             ? Double.compare(curr.getPm10(), next.getPm10())
                             : Double.compare(next.getPm10(), curr.getPm10());
                 }
@@ -85,8 +103,8 @@ public class SensorController {
             case "pm25":
                 results = particleRepository.findByPm25GreaterThanAndPm25LessThan(above, below);
                 conversionFunc = row -> new PM10Measurement(row.getTimestamp(), row.getPm25());
-                if (triState.isDefined()) {
-                    sortingComparator = (curr, next) -> triState.isTrue()
+                if (!sort.isDefault()) {
+                    sortingComparator = (curr, next) -> sort.getDirectionAsBoolean()
                             ? Double.compare(curr.getPm25(), next.getPm25())
                             : Double.compare(next.getPm25(), curr.getPm25());
                 }
@@ -97,7 +115,9 @@ public class SensorController {
         return apply(results, before, after, page, max, full, conversionFunc, sortingComparator);
     }
 
-    private List<?> handleTemperatureTable(int above, int below, LocalDate before, LocalDate after, int max, boolean full, int page, String type, ITriState triState) {
+    // Suppresses potential NPE warning on getDirectionAsBoolean, as this is mitigated by a prepended isDefault condition
+    @SuppressWarnings("ConstantConditions")
+    private List<?> handleTemperatureTable(int above, int below, LocalDate before, LocalDate after, int max, boolean full, int page, String type, Sort sort) {
         List<TemperatureRow> results;
         Function<TemperatureRow, Measurement> conversionFunc;
         Comparator<TemperatureRow> sortingComparator = null;
@@ -106,8 +126,8 @@ public class SensorController {
             case "light":
                 results = temperatureRepository.findByLightGreaterThanAndLightLessThan(above, below);
                 conversionFunc = row -> new LightMeasurement(row.getTimestamp(), row.getLight());
-                if (triState.isDefined()) {
-                    sortingComparator = (curr, next) -> triState.isTrue()
+                if (!sort.isDefault()) {
+                    sortingComparator = (curr, next) -> sort.getDirectionAsBoolean()
                             ? Double.compare(curr.getLight(), next.getLight())
                             : Double.compare(next.getLight(), curr.getLight());
                 }
@@ -115,47 +135,47 @@ public class SensorController {
             case "pressure":
                 results = temperatureRepository.findByPressureGreaterThanAndPressureLessThan(above, below);
                 conversionFunc = row -> new PressureMeasurement(row.getTimestamp(), row.getPressure());
-                if (triState.isDefined()) {
-                    sortingComparator = (curr, next) -> (int) (triState.isTrue()
+                if (!sort.isDefault()) {
+                    sortingComparator = (curr, next) -> sort.getDirectionAsBoolean()
                             ? Double.compare(curr.getPressure(), next.getPressure())
-                            : Double.compare(next.getPressure(), curr.getPressure()));
+                            : Double.compare(next.getPressure(), curr.getPressure());
                 }
                 break;
             case "humidity":
                 results = temperatureRepository.findByHumidityGreaterThanAndHumidityLessThan(above, below);
                 conversionFunc = row -> new HumidityMeasurement(row.getTimestamp(), row.getHumidity());
-                if (triState.isDefined()) {
-                    sortingComparator = (curr, next) -> (int) (triState.isTrue()
+                if (!sort.isDefault()) {
+                    sortingComparator = (curr, next) -> sort.getDirectionAsBoolean()
                             ? Double.compare(curr.getHumidity(), next.getHumidity())
-                            : Double.compare(next.getHumidity(), curr.getHumidity()));
+                            : Double.compare(next.getHumidity(), curr.getHumidity());
                 }
                 break;
             case "outside_temp":
                 results = temperatureRepository.findByTemp1GreaterThanAndTemp1LessThan(above, below);
                 conversionFunc = row -> new SideTemperatureMeasurement(row.getTimestamp(), row.getTemp1());
-                if (triState.isDefined()) {
-                    sortingComparator = (curr, next) -> (int) (triState.isTrue()
+                if (!sort.isDefault()) {
+                    sortingComparator = (curr, next) -> sort.getDirectionAsBoolean()
                             ? Double.compare(curr.getTemp1(), next.getTemp1())
-                            : Double.compare(next.getTemp1(), curr.getTemp1()));
+                            : Double.compare(next.getTemp1(), curr.getTemp1());
                 }
                 break;
             case "inside_temp":
                 results = temperatureRepository.findByTemp2GreaterThanAndTemp2LessThan(above, below);
                 conversionFunc = row -> new SideTemperatureMeasurement(row.getTimestamp(), row.getTemp2());
-                if (triState.isDefined()) {
-                    sortingComparator = (curr, next) -> (int) (triState.isTrue()
+                if (!sort.isDefault()) {
+                    sortingComparator = (curr, next) -> sort.getDirectionAsBoolean()
                             ? Double.compare(curr.getTemp2(), next.getTemp2())
-                            : Double.compare(next.getTemp2(), curr.getTemp2()));
+                            : Double.compare(next.getTemp2(), curr.getTemp2());
                 }
                 break;
             case "temperature":
                 results = temperatureRepository.findByTemp1GreaterThanAndTemp2GreaterThanAndTemp1LessThanAndTemp2LessThan(above, above, below, below);
                 conversionFunc = row -> new BothTemperatureMeasurement(row.getTimestamp(), row.getTemp2(), row.getTemp1());
-                if (triState.isDefined()) {
+                if (!sort.isDefault()) {
                     sortingComparator = (curr, next) -> {
                         double currAvg = (curr.getTemp1()+curr.getTemp2())/2;
                         double nextAvg = (next.getTemp1()+next.getTemp2())/2;
-                        return (int) (triState.isTrue()
+                        return (int) (sort.getDirectionAsBoolean()
                                 ? Double.compare(currAvg, nextAvg)
                                 : Double.compare(nextAvg, currAvg));
                     };
