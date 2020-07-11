@@ -3,6 +3,8 @@ package org.dockbox.climate.model.mysql;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.dockbox.climate.model.MeasurementValues.JsonProperties;
+
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -23,7 +25,7 @@ import lombok.Getter;
 @Getter
 public class TemperatureRow extends AbstractRow {
 
-    @JsonProperty("lux")
+    @JsonProperty(JsonProperties.LIGHT)
     private int light;
 
     @Column(name = "Datum")
@@ -34,17 +36,17 @@ public class TemperatureRow extends AbstractRow {
     @JsonIgnore
     private Time time;
 
-    @JsonProperty("temperatureOutside")
+    @JsonProperty(JsonProperties.TEMPERATURE_OUTSIDE)
     private double temp1;
-    @JsonProperty("temperatureInside")
+    @JsonProperty(JsonProperties.TEMPERATURE_INSIDE)
     private double temp2;
 
     @Column(name = "humi")
-    @JsonProperty("humidity")
+    @JsonProperty(JsonProperties.HUMIDITY)
     private double humidity;
 
     @Column(name = "press")
-    @JsonProperty("pressure")
+    @JsonProperty(JsonProperties.PRESSURE)
     private double pressure;
 
     @Id
