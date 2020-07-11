@@ -1,0 +1,24 @@
+*
+  box-sizing: border-box
+  padding: 0
+  margin: 0
+
+.container
+  -webkit-columns: 2 200px
+  -moz-columns: 2 200px
+  columns: 2 200px
+  -webkit-column-gap: 1em
+  -moz-column-gap: 1em
+  column-gap: 1em
+
+.wrapper
+  overflow: hidden
+  padding: .5em
+
+.wrapper label
+  float: left
+  width: 50px
+
+.wrapper label + input
+  float: left
+  width: calc(100% - 50px)

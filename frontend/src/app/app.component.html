@@ -1,0 +1,26 @@
+<!--TODO: Proper notification style-->
+<b>{{notification}}</b><br>
+
+<label>
+  Load light
+  <input type="checkbox" [checked]="loadedLight" (change)="loadedLight ? unload('lux') : load('light', 'lux', null)"/>
+</label>
+
+<div class="container">
+  <div *ngFor="let key of keys" class="wrapper dark">
+    <ngx-charts-line-chart
+      [view]="[700, 300]"
+      [scheme]="colorScheme"
+      [legend]="true"
+      [showXAxisLabel]="true"
+      [showYAxisLabel]="true"
+      [xAxis]="true"
+      [yAxis]="true"
+      [xAxisLabel]="'Timestamp'"
+      [yAxisLabel]="legend[key].human_readable_name"
+      [timeline]="false"
+      [results]="chartData[key]"
+    >
+    </ngx-charts-line-chart>
+  </div>
+</div>
