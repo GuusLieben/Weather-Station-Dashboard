@@ -25,8 +25,6 @@ public class ParticleRow extends AbstractRow {
     private String recorded;
 
     private double pm10;
-
-    @JsonProperty("pm2_5")
     private double pm25;
 
     @JsonProperty("timestamp")
