@@ -8,6 +8,7 @@ import org.dockbox.climate.model.LightMeasurement;
 import org.dockbox.climate.model.Measurement;
 import org.dockbox.climate.model.PM10Measurement;
 import org.dockbox.climate.model.PressureMeasurement;
+import org.dockbox.climate.model.RestResponse;
 import org.dockbox.climate.model.SideTemperatureMeasurement;
 import org.dockbox.climate.model.mysql.AbstractRow;
 import org.dockbox.climate.model.mysql.ParticleRow;
@@ -15,6 +16,7 @@ import org.dockbox.climate.model.mysql.TemperatureRow;
 import org.dockbox.climate.repository.ParticleRepository;
 import org.dockbox.climate.repository.TemperatureRepository;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +33,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@CrossOrigin(origins = "*")
 @RestController
 public class SensorController {
 
@@ -62,7 +65,7 @@ public class SensorController {
     }
 
     @RequestMapping("/api/{type}")
-    public Object getLightMeasurements(
+    public RestResponse getLightMeasurements(
             @RequestParam(required = false, defaultValue = "-1") int above,
             @RequestParam(required = false, defaultValue = "" + Integer.MAX_VALUE) int below,
 
@@ -78,14 +81,26 @@ public class SensorController {
             @PathVariable("type") String type
     ) {
         Sort sorter = "asc".equals(sort) ? Sort.ASCENDING : "desc".equals(sort) ? Sort.DESCENDING : Sort.DEFAULT;
-        return (type.startsWith("pm"))
+        boolean isParticulateMatter = type.startsWith("pm");
+        List<?> data = isParticulateMatter
                 ? handleParticleTable(above, below, before, after, max > 0 ? max : 200, full, page, type, sorter)
                 : handleTemperatureTable(above, below, before, after, max > 0 ? max : 500, full, page, type, sorter);
+
+        RestResponse res;
+        if (!full) {
+            res = new RestResponse(data);
+            Measurement measurement = (Measurement) data.get(0);
+            res.addToLegend(measurement);
+        } else {
+            if (isParticulateMatter) res = new RestResponse(data, RestResponse.FULL_PARTICLE_RES);
+            else res = new RestResponse(data, RestResponse.FULL_TEMPERATURE_RES);
+        }
+        return res;
     }
 
     // Suppresses potential NPE warning on getDirectionAsBoolean, as this is mitigated by a prepended isDefault condition
     @SuppressWarnings("ConstantConditions")
-    private Object handleParticleTable(int above, int below, LocalDate before, LocalDate after, int max, boolean full, int page, String type, Sort sort) {
+    private List<?> handleParticleTable(int above, int below, LocalDate before, LocalDate after, int max, boolean full, int page, String type, Sort sort) {
         List<ParticleRow> results;
         Function<ParticleRow, Measurement> conversionFunc;
         Comparator<ParticleRow> sortingComparator = null;
