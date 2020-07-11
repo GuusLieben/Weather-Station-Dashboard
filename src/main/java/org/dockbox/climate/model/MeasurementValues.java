@@ -41,7 +41,7 @@ public enum MeasurementValues {
         public static final String PM10 = "pm10";
         public static final String PM25 = "pm25";
         public static final String HUMIDITY = "humidity";
-        public static final String LIGHT = "lux";
+        public static final String LIGHT = "light";
         public static final String PRESSURE = "pressure";
         public static final String TEMPERATURE = "temperature";
         public static final String TEMPERATURE_OUTSIDE = "temperatureOutside";
