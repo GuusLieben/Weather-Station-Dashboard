@@ -1,26 +1,40 @@
 <!--TODO: Proper notification style-->
 <b>{{notification}}</b><br>
 
-<label>
-  Load light
-  <input type="checkbox" [checked]="loadedLight" (change)="loadedLight ? unload('lux') : load('light', 'lux', null)"/>
-</label>
-
-<div class="container">
-  <div *ngFor="let key of keys" class="wrapper dark">
-    <ngx-charts-line-chart
-      [view]="[700, 300]"
-      [scheme]="colorScheme"
-      [legend]="true"
-      [showXAxisLabel]="true"
-      [showYAxisLabel]="true"
-      [xAxis]="true"
-      [yAxis]="true"
-      [xAxisLabel]="'Timestamp'"
-      [yAxisLabel]="legend[key].human_readable_name"
-      [timeline]="false"
-      [results]="chartData[key]"
-    >
-    </ngx-charts-line-chart>
+<div class="row-wrapper">
+  <b>Latest measurements</b>
+  <code>{{latestMeasurements|json}}</code><br>
+  <b>Legend</b>
+  <code>{{legend|json}}</code>
+</div>
+<div class="row-wrapper">
+  <label *ngFor="let cb of checkboxes">
+    {{cb.displayName}}
+    <input type="checkbox" [checked]="loaded[cb.property]" (change)="loaded[cb.property] ? unload(cb.property) : load(cb.urlValue, cb.property, null)">
+  </label>
+</div>
+<div class="row-wrapper">
+  <div class="row">
+    <div *ngFor="let key of keys" class="col-sm-12 col-md-12 col-lg-6 d-flex justify-content-center" id="chart-parent">
+      <ngx-charts-line-chart
+        [scheme]="colorScheme"
+        [schemeType]="'linear'"
+        [rotateXAxisTicks]="true"
+        [legend]="true"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        [xAxis]="true"
+        [yAxis]="true"
+        [yScaleMax]="calcMax(key)"
+        [yScaleMin]="calcMin(key)"
+        [gradient]="true"
+        [xAxisLabel]="'Timestamp'"
+        [yAxisLabel]="legend[key].human_readable_name"
+        [timeline]="false"
+        [results]="chartData[key]"
+        [activeEntries]="chartData[key]"
+      >
+      </ngx-charts-line-chart>
+    </div>
   </div>
 </div>

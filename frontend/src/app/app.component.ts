@@ -11,11 +11,10 @@ export class AppComponent {
   title = 'frontend';
 
   // Graph properties
-  chartData: any = {};
   colorScheme = {
-    domain: ['#5AA454', '#E44D25', '#CFC0BB', '#7aa3e5', '#a8385d', '#aae3f5']
+    domain: ['#5AA454', '#2e94bd']
   };
-  legend: any
+  legend: any = {}
 
   // Default loading object for graphs
   loading = [{
@@ -28,52 +27,95 @@ export class AppComponent {
   // Keys which should not be generated from Axios responses (blacklist)
   hiddenKeys = ['ldt', 'timestamp']
 
+  // Measurement data
+  chartData: any = {};
+  minMax: any = {}
+  latestMeasurements: any = {}
+
   // Notification is shown at the top of the page, if present
   notification: string
 
-  // TODO: Temporary object
-  loadedLight = false
+  // Checkboxes indicate which data is loaded, and allow the user to manually load or unload them
+  checkboxes: any = []
+  checkboxHistory: any = []
+
+  // Saves all keys currently loaded
+  loaded: any = {}
 
   constructor() {
-    console.log('Started at ' + new Date().getTime())
-    this.load('light', 'lux', () => {
-      // this.unload('lux');
+    this.load('light', null, true)
+  }
+
+  generateCheckbox(property, displayName, urlValue) {
+    this.checkboxes.push({
+      displayName,
+      property,
+      urlValue
     })
   }
 
-  unload(property) {
-    // TODO: Temporary object
-    this.loadedLight = false
-    delete this.chartData[property]
-    let keyI = this.keys.indexOf(property)
-    if (keyI >= 0) {
-      this.keys.splice(keyI, 1)
-    }
+  calcMin(key) {
+    let min = this.minMax[key].min
+    let max = this.minMax[key].max
+    let diff = max - min
+    return min - (diff / 5)
   }
 
-  load(url_value, property, after) {
+  calcMax(key) {
+    let min = this.minMax[key].min
+    let max = this.minMax[key].max
+    let diff = max - min
+    return max + (diff / 5)
+  }
+
+  unload(property) {
+    this.loaded[property] = false
+    delete this.chartData[property]
+    delete this.minMax[property]
+    delete this.latestMeasurements[property]
+
+    let keyI = this.keys.indexOf(property)
+    if (keyI >= 0) this.keys.splice(keyI, 1)
+  }
+
+  load(property, after, full = false) {
     this.notification = `Loading ${property}...`
     this.chartData[property] = [this.loading]
-    axios.default.get(`http://localhost:8080/api/${url_value}?full=true`).then(res => {
-
-      // TODO: Temporary object
-      this.loadedLight = true
-      this.legend = res.data.legend
+    axios.default.get(`http://localhost:8080/api/${property}${full?'?full=true':''}`).then(res => {
       let data = res.data.data
-
       let resKeys = Object.keys(data[0])
         .filter(key => this.hiddenKeys.indexOf(key) < 0)
 
       for (let i = 0; i < resKeys.length; i++) {
         let key = resKeys[i];
+
+        this.chartData[key] = [this.loading]
+        this.loaded[key] = true
+        this.legend[key] = res.data.legend[key]
         this.keys.push(key)
+
+        console.log(key)
+
+        if (this.checkboxHistory.indexOf(key) < 0) {
+          this.generateCheckbox(key, this.legend[key].human_readable_name, key)
+          this.checkboxHistory.push(key)
+        }
+
+        this.minMax[key] = {min: Number.MAX_SAFE_INTEGER, max: Number.MIN_SAFE_INTEGER}
 
         let serie = {
           name: `${this.legend[key].display_name} (${this.legend[key].symbol})`,
           series: data.map(row => {
+            let value = row[key]
+
+            if (value < this.minMax[key].min) this.minMax[key].min = value
+            if (value > this.minMax[key].max) this.minMax[key].max = value
+
+            this.latestMeasurements[key] = value;
+
             return {
               name: row.timestamp,
-              value: row[key]
+              value
             }
           })
         }
@@ -85,7 +127,8 @@ export class AppComponent {
       console.log('Finished at ' + new Date().getTime())
       if (after) after()
     }).catch(err => {
-      console.log(JSON.stringify(err))
+      console.error('Oh no!')
+      console.error(JSON.stringify(err))
       this.notification = JSON.stringify(err)
     })
   }
