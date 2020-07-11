@@ -2,6 +2,8 @@ package org.dockbox.climate.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.dockbox.climate.model.MeasurementValues.JsonProperties;
+
 import java.sql.Timestamp;
 
 public class PressureMeasurement extends Measurement {
@@ -12,16 +14,26 @@ public class PressureMeasurement extends Measurement {
 
     @Override
     public String getDisplayName() {
-        return "Hectopascal";
+        return MeasurementValues.PRESSURE.getDisplayName();
     }
 
     @Override
     public String getSymbol() {
-        return "hPa";
+        return MeasurementValues.PRESSURE.getSymbol();
     }
 
     @Override
-    @JsonProperty("pressure")
+    public String getHumanReadableName() {
+        return MeasurementValues.PRESSURE.getHumanReadableName();
+    }
+
+    @Override
+    public String getJsonProperty() {
+        return JsonProperties.PRESSURE;
+    }
+
+    @Override
+    @JsonProperty(JsonProperties.PRESSURE)
     public double getMeasure() {
         return super.measure;
     }

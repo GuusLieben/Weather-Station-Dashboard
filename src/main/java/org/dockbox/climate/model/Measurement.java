@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.sql.Timestamp;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
@@ -28,6 +27,12 @@ public abstract class Measurement {
 
     @JsonIgnore
     public abstract String getSymbol();
+
+    @JsonIgnore
+    public abstract String getHumanReadableName();
+
+    @JsonIgnore
+    public abstract String getJsonProperty();
 
     public abstract double getMeasure();
 }

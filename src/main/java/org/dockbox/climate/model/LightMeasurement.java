@@ -1,7 +1,8 @@
 package org.dockbox.climate.model;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.dockbox.climate.model.MeasurementValues.JsonProperties;
 
 import java.sql.Timestamp;
 
@@ -13,16 +14,26 @@ public class LightMeasurement extends Measurement {
 
     @Override
     public String getDisplayName() {
-        return "Lux";
+        return MeasurementValues.LIGHT.getDisplayName();
     }
 
     @Override
     public String getSymbol() {
-        return "lx";
+        return MeasurementValues.LIGHT.getSymbol();
     }
 
     @Override
-    @JsonProperty("lux")
+    public String getHumanReadableName() {
+        return MeasurementValues.LIGHT.getHumanReadableName();
+    }
+
+    @Override
+    public String getJsonProperty() {
+        return JsonProperties.LIGHT;
+    }
+
+    @Override
+    @JsonProperty(JsonProperties.LIGHT)
     public double getMeasure() {
         return super.measure;
     }

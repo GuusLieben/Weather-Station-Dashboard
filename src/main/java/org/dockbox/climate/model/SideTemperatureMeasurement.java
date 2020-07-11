@@ -2,6 +2,8 @@ package org.dockbox.climate.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.dockbox.climate.model.MeasurementValues.JsonProperties;
+
 import java.sql.Timestamp;
 
 public class SideTemperatureMeasurement extends Measurement {
@@ -12,16 +14,26 @@ public class SideTemperatureMeasurement extends Measurement {
 
     @Override
     public String getDisplayName() {
-        return "Celsius";
+        return MeasurementValues.TEMPERATURE.getDisplayName();
     }
 
     @Override
     public String getSymbol() {
-        return "°C";
+        return MeasurementValues.TEMPERATURE.getSymbol();
     }
 
     @Override
-    @JsonProperty("temperature")
+    public String getHumanReadableName() {
+        return MeasurementValues.TEMPERATURE.getHumanReadableName();
+    }
+
+    @Override
+    public String getJsonProperty() {
+        return JsonProperties.TEMPERATURE;
+    }
+
+    @Override
+    @JsonProperty(JsonProperties.TEMPERATURE)
     public double getMeasure() {
         return super.measure;
     }

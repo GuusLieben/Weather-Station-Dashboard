@@ -2,6 +2,8 @@ package org.dockbox.climate.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.dockbox.climate.model.MeasurementValues.JsonProperties;
+
 import java.sql.Timestamp;
 
 public class PM25Measurement extends Measurement {
@@ -12,16 +14,26 @@ public class PM25Measurement extends Measurement {
 
     @Override
     public String getDisplayName() {
-        return "2.5 Micrometer";
+        return MeasurementValues.PM25.getDisplayName();
     }
 
     @Override
     public String getSymbol() {
-        return "μm";
+        return MeasurementValues.PM25.getSymbol();
     }
 
     @Override
-    @JsonProperty("pm25")
+    public String getHumanReadableName() {
+        return MeasurementValues.PM25.getHumanReadableName();
+    }
+
+    @Override
+    public String getJsonProperty() {
+        return JsonProperties.PM25;
+    }
+
+    @Override
+    @JsonProperty(JsonProperties.PM25)
     public double getMeasure() {
         return super.measure;
     }
