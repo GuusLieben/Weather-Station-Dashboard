@@ -1,5 +1,7 @@
-import {Component} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import * as axios from 'axios';
+import * as moment from 'moment';
+import {DaterangepickerDirective} from "ngx-daterangepicker-material";
 
 @Component({
   selector: 'app-root',
@@ -41,6 +43,20 @@ export class AppComponent {
 
   // Saves all keys currently loaded
   loaded: any = {}
+
+  // Date ranges
+  ranges: any = {
+    Today: [moment().startOf('day'), moment().endOf('day')],
+    Yesterday: [moment().subtract(1, 'days').startOf('day'), moment().subtract(1, 'days').endOf('day')],
+    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+    'This Month': [moment().startOf('month'), moment().endOf('month')],
+    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+  };
+
+  change(e): void {
+    console.log(e);
+  }
 
   constructor() {
     this.load('light', null, true)

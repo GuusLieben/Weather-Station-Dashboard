@@ -12,6 +12,18 @@
     {{cb.displayName}}
     <input type="checkbox" [checked]="loaded[cb.property]" (change)="loaded[cb.property] ? unload(cb.property) : load(cb.urlValue, cb.property, null)">
   </label>
+  <input
+    matInput
+    ngxDaterangepickerMd
+    showCancel="true"
+    placeholder="Choose date"
+    [ranges]="ranges"
+    [showCustomRangeLabel]="true"
+    [showDropdowns]="true"
+    [lockStartDate]="false"
+    [customRangeDirection]="false"
+    (change)="change($event)"
+  />
 </div>
 <div class="row-wrapper">
   <div class="row">
@@ -27,7 +39,6 @@
         [yAxis]="true"
         [yScaleMax]="calcMax(key)"
         [yScaleMin]="calcMin(key)"
-        [gradient]="true"
         [xAxisLabel]="'Timestamp'"
         [yAxisLabel]="legend[key].human_readable_name"
         [timeline]="false"
